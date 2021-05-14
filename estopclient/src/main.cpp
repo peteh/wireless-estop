@@ -22,7 +22,6 @@ typedef struct struct_message {
     char a[32];
     int b;
     float c;
-    String d;
     bool e;
 } struct_message;
 
@@ -91,7 +90,6 @@ void loop() {
     strcpy(myData.a, "THIS IS A CHAR");
     myData.b = random(1,20);
     myData.c = 1.2;
-    myData.d = "Hello";
     myData.e = false;
 
     // Send message via ESP-NOW

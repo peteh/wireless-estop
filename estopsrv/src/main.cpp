@@ -18,7 +18,6 @@ typedef struct struct_message {
     char a[32];
     int b;
     float c;
-    String d;
     bool e;
 } struct_message;
 
@@ -28,7 +27,7 @@ struct_message myData;
 // Callback function that will be executed when data is received
 void OnDataRecv(uint8_t * mac, uint8_t *incomingData, uint8_t len) {
 
-  if(g_messageCounter % 1 == 3)
+  if(g_messageCounter % 1 == 0)
   {
     memcpy(&myData, incomingData, sizeof(myData));
     Serial.print("Bytes received: ");
@@ -39,10 +38,15 @@ void OnDataRecv(uint8_t * mac, uint8_t *incomingData, uint8_t len) {
     Serial.println(myData.b);
     Serial.print("Float: ");
     Serial.println(myData.c);
-    Serial.print("String: ");
-    Serial.println(myData.d);
     Serial.print("Bool: ");
     Serial.println(myData.e);
+    Serial.printf("> Successfully received Local MAC Address : %02x:%02x:%02x:%02x:%02x:%02x\n",
+    (unsigned char) mac[0],
+    (unsigned char) mac[1],
+    (unsigned char) mac[2],
+    (unsigned char) mac[3],
+    (unsigned char) mac[4],
+    (unsigned char) mac[5]);
     Serial.println();
   }
   g_messageCounter++;
