@@ -5,7 +5,7 @@
 #include <SerialLogger.h>
 
 #define BUTTON_PIN_D2 4
-#define LOOP_DELAY 20
+#define LOOP_DELAY 1000
 
 // Address of the central station
 uint8_t masterMAC[] = {0xDE, 0xAD, 0x13, 0x37, 0x00, 0x01};
