@@ -7,7 +7,7 @@
 // Address of the central station
 uint8_t masterMAC[] = {0xDE, 0xAD, 0x13, 0x37, 0x00, 0x01};
 
-// Address of the central station
+// Address of the client station
 uint8_t clientMAC[] = {0xDE, 0xAD, 0x13, 0x37, 0x00, 0x02};
 
 bool g_message = false;
