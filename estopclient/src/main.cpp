@@ -7,6 +7,8 @@
 #define BUTTON_PIN_D2 4
 #define LOOP_DELAY 1000
 
+#define WIFI_CHANNEL 0
+
 // Address of the central station
 uint8_t masterMAC[] = {0xDE, 0xAD, 0x13, 0x37, 0x00, 0x01};
 
@@ -55,7 +57,7 @@ void setup() {
   // For Soft Access Point (AP) Mode
   //wifi_set_macaddr(SOFTAP_IF, &newMACAddress[0]);
   // For Station Mode
-  wifi_set_macaddr(STATION_IF, &masterMAC[0]);
+  wifi_set_macaddr(STATION_IF, &clientMAC[0]);
   Log::info("[NEW] ESP8266 Board MAC Address: " + WiFi.macAddress());
 
   // Init ESP-NOW
@@ -70,7 +72,7 @@ void setup() {
   esp_now_register_send_cb(OnDataSent);
   
   // Register peer
-  esp_now_add_peer(masterMAC, ESP_NOW_ROLE_SLAVE, 1, NULL, 0);
+  esp_now_add_peer(masterMAC, ESP_NOW_ROLE_SLAVE, WIFI_CHANNEL, NULL, 0);
 }
 
 void loop() {
