@@ -1,33 +1,82 @@
 #include <Arduino.h>
-#include <WiFi.h>
-#include <esp_wifi.h>
+#include <ESP8266WiFi.h>
+#include <espnow.h>
+#include <Log.h>
 #include <SerialLogger.h>
 
-// Set master mac address
-uint8_t newMACAddress[] = {0xDE, 0xAD, 0x13, 0x37, 0x00, 0x01};
-Connectivity
+// Address of the central station
+uint8_t masterMAC[] = {0xDE, 0xAD, 0x13, 0x37, 0x00, 0x01};
+
+// Address of the central station
+uint8_t clientMAC[] = {0xDE, 0xAD, 0x13, 0x37, 0x00, 0x02};
+
+bool g_message = false;
+
+// Structure example to receive data
+// Must match the sender structure
+typedef struct struct_message {
+    char a[32];
+    int b;
+    float c;
+    String d;
+    bool e;
+} struct_message;
+
+// Create a struct_message called myData
+struct_message myData;
+
+// Callback function that will be executed when data is received
+void OnDataRecv(uint8_t * mac, uint8_t *incomingData, uint8_t len) {
+  memcpy(&myData, incomingData, sizeof(myData));
+  Serial.print("Bytes received: ");
+  Serial.println(len);
+  Serial.print("Char: ");
+  Serial.println(myData.a);
+  Serial.print("Int: ");
+  Serial.println(myData.b);
+  Serial.print("Float: ");
+  Serial.println(myData.c);
+  Serial.print("String: ");
+  Serial.println(myData.d);
+  Serial.print("Bool: ");
+  Serial.println(myData.e);
+  Serial.println();
+  g_message = !g_message;
+}
+
 void setup(){
   Log::init(new SerialLogger());
 
   Serial.begin(115200);
-
   Serial.println();
-  
+
+  pinMode(LED_BUILTIN, OUTPUT);
+
   WiFi.mode(WIFI_STA);
   
-  Serial.print("[OLD] ESP32 Board MAC Address:  ");
-  Serial.println(WiFi.macAddress());
+  Log::info("[OLD] ESP8266 Board MAC Address: " + WiFi.macAddress());
+  // For Soft Access Point (AP) Mode
+  //wifi_set_macaddr(SOFTAP_IF, &newMACAddress[0]);
+  // For Station Mode
+  wifi_set_macaddr(STATION_IF, &masterMAC[0]);
+  Log::info("[NEW] ESP8266 Board MAC Address: " + WiFi.macAddress());
+
+  // Set device as a Wi-Fi Station
+  WiFi.mode(WIFI_STA);
+
+  // Init ESP-NOW
+  if (esp_now_init() != 0) {
+    Serial.println("Error initializing ESP-NOW");
+    return;
+  }
   
-  // ESP32 Board add-on before version < 1.0.5
-  //esp_wifi_set_mac(ESP_IF_WIFI_STA, &newMACAddress[0]);
-  
-  // ESP32 Board add-on after version > 1.0.5
-  esp_wifi_set_mac(WIFI_IF_STA, &newMACAddress[0]);
-  
-  Serial.print("[NEW] ESP32 Board MAC Address:  ");
-  Serial.println(WiFi.macAddress());
+  // Once ESPNow is successfully Init, we will register for recv CB to
+  // get recv packer info
+  esp_now_set_self_role(ESP_NOW_ROLE_SLAVE);
+  esp_now_register_recv_cb(OnDataRecv);
+
 }
  
 void loop(){
-
+  digitalWrite(LED_BUILTIN, g_message);
 }

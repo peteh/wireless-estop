@@ -9,6 +9,11 @@ void Log::init(ILogger *log)
     instance()->m_log = log;
 }
 
+void Log::info(const String &str)
+{
+    instance()->m_log->info(str.c_str());
+}
+
 void Log::info(const char *str)
 {
     instance()->m_log->info(str);
@@ -21,6 +26,12 @@ void Log::info(const char *fmt, va_list argp)
     info(s);
 }
 
+
+void Log::warn(const String &str)
+{
+    instance()->m_log->warn(str.c_str());
+}
+
 void Log::warn(const char *str)
 {
     instance()->m_log->warn(str);
@@ -31,6 +42,12 @@ void Log::warn(const char *fmt, va_list argp)
     char *s = NULL;
     sprintf(s, fmt, argp);
     warn(s);
+}
+
+
+void Log::error(const String &str)
+{
+    instance()->m_log->error(str.c_str());
 }
 
 void Log::error(const char *str)
