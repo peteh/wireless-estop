@@ -43,7 +43,7 @@ void OnDataSent(uint8_t *mac_addr, uint8_t sendStatus) {
 
 void setup() {
   Log::init(new SerialLogger());
-  
+
   Serial.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(BUTTON_PIN_D2, INPUT);
@@ -85,7 +85,18 @@ void loop() {
       Serial.printf("Estop free changed %d -> %d\n", previousEStopFree, eStopFree);
     }
     previousEStopFree = eStopFree;
-    Serial.flush();
+    
+    strcpy(myData.a, "THIS IS A CHAR");
+    myData.b = random(1,20);
+    myData.c = 1.2;
+    myData.d = "Hello";
+    myData.e = false;
+
+    // Send message via ESP-NOW
+    esp_now_send(masterMAC, (uint8_t *) &myData, sizeof(myData));
+
+    
+
     delay(LOOP_DELAY);
   }  
 }
