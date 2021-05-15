@@ -5,6 +5,11 @@
 
 class CoutLogger : public ILogger
 {
+    void debug(const char *str) override
+    {
+        std::cout << "[DEBUG] "<< str << std::endl;
+    }
+
     void info(const char *str) override
     {
         std::cout << "[INFO] "<< str << std::endl;

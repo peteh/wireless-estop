@@ -11,6 +11,11 @@ class SerialLogger : public ILogger
 
     }
 
+    void debug(const char *str) override
+    {
+        Serial.printf("[DEBUG] %s\n", str);
+    }
+
     void info(const char *str) override
     {
         Serial.printf("[INFO] %s\n", str);

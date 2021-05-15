@@ -4,6 +4,8 @@
 class ILogger
 {
 public:
+    virtual void debug(const char *str) = 0;
+
     virtual void info(const char *str) = 0;
     
     virtual void warn(const char *str) = 0;

@@ -13,7 +13,8 @@ EStopReceiver::EStopReceiver(const uint8_t *clientMac, uint8_t wifiChannel, unsi
       m_timeoutMs(timeoutMs)
 {
     memcpy(&m_clientMAC[0], clientMac, sizeof(m_clientMAC));
-    // TODO initialize estopmessage struct
+    m_estop_message.messageNum = 0;
+    m_estop_message.eStopFree = false;
 }
 
 bool EStopReceiver::init()
@@ -76,17 +77,15 @@ void EStopReceiver::messageCallBack(uint8_t *mac, uint8_t *incomingData, uint8_t
     m_lastMessageTimestamp = millis();
     if (false)
     {
-        Serial.print("Bytes received: ");
-        Serial.println(len);
-        Serial.println(m_estop_message.eStopFree);
-        Serial.printf("> Successfully received Local MAC Address : %02x:%02x:%02x:%02x:%02x:%02x\n",
+        //Log::infof("Bytes received: %d", len);
+        //Log::infof("EStop free: %d", m_estop_message.eStopFree);
+        Log::infof("> Successfully received Local MAC Address : %02x:%02x:%02x:%02x:%02x:%02x\n",
                       (unsigned char)mac[0],
                       (unsigned char)mac[1],
                       (unsigned char)mac[2],
                       (unsigned char)mac[3],
                       (unsigned char)mac[4],
                       (unsigned char)mac[5]);
-        Serial.println();
     }
     m_messageCounter++;
 }
@@ -97,6 +96,19 @@ bool EStopReceiver::isEStopFree()
         return false;
     }
     return m_estop_message.eStopFree;
+}
+
+EStopReceiver::EStopState EStopReceiver::getEStopState(){
+    if(isTimedout()){
+        return ESTOP_TIMEOUT;
+    }
+    if(isEStopFree())
+    {
+        return ESTOP_FREE;
+    }
+    else{
+        return ESTOP_ACTIVE;
+    }
 }
 
 bool EStopReceiver::isTimedout(){
