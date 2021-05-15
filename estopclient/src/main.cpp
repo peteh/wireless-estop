@@ -4,31 +4,14 @@
 #include <Log.h>
 #include <SerialLogger.h>
 
+#include "../../common/common.h"
+
 #define BUTTON_PIN_D2 4
 #define LOOP_DELAY 20
 
-#define WIFI_CHANNEL 0
-
-// Address of the central station
-uint8_t masterMAC[] = {0xDE, 0xAD, 0x13, 0x37, 0x00, 0x01};
-
-// Address of the client station
-uint8_t clientMAC[] = {0xDE, 0xAD, 0x13, 0x37, 0x00, 0x02};
-
-
-// Structure example to receive data
-// Must match the sender structure
-typedef struct struct_message {
-    char a[32];
-    int b;
-    float c;
-    bool eStopFree;
-} struct_message;
 
 // Create a struct_message called myData
-struct_message myData;
-
-
+estop_message myData;
 unsigned int g_messageCounter = 0;
 
 // Callback when data is sent
@@ -56,7 +39,7 @@ void setup() {
   // delete old wifi settings
   WiFi.disconnect();
 
-    // Set device as a Wi-Fi Station
+  // Set device as a Wi-Fi Station
   WiFi.mode(WIFI_STA);
   //WiFi.setSleepMode(WIFI_NONE_SLEEP);
 
@@ -93,17 +76,15 @@ void loop() {
     if(eStopFree != previousEStopFree){
       Serial.printf("Estop free changed %d -> %d\n", previousEStopFree, eStopFree);
     }
-    previousEStopFree = eStopFree;
     
-    strcpy(myData.a, "THIS IS A CHAR");
-    myData.b = random(1,20);
-    myData.c = 1.2;
     myData.eStopFree = eStopFree;
-
+    myData.messageNum = g_messageCounter;
     // Send message via ESP-NOW
     esp_now_send(masterMAC, (uint8_t *) &myData, sizeof(myData));
 
     
+    previousEStopFree = eStopFree;
+
     delay(LOOP_DELAY);
     //ESP.deepSleep(LOOP_DELAY);
   }  
