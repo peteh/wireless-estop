@@ -4,32 +4,30 @@
 #include <Log.h>
 #include <SerialLogger.h>
 
-#define WIFI_CHANNEL 0
+#include "../../common/common.h"
 
-// Address of the central station
-uint8_t masterMAC[] = {0xDE, 0xAD, 0x13, 0x37, 0x00, 0x01};
-
-// Address of the client station
-uint8_t clientMAC[] = {0xDE, 0xAD, 0x13, 0x37, 0x00, 0x02};
 
 int g_messageCounter = 0;
 
-// Structure example to receive data
-// Must match the sender structure
-typedef struct struct_message {
-    char a[32];
-    int b;
-    float c;
-    bool eStopFree;
-} struct_message;
-
 // Create a struct_message called myData
-struct_message myData;
+estop_message myData;
 
 // Callback function that will be executed when data is received
 void OnDataRecv(uint8_t * mac, uint8_t *incomingData, uint8_t len) {
+  if(memcmp(mac, clientMAC, sizeof(clientMAC)) != 0)
+  {
+    // TODO: add mac to error message
+    Log::error("Received unexpected message from xx");
+    return;
+  }
 
-  struct_message* incoming = (struct_message*) incomingData;
+  if(len != sizeof(estop_message)){
+    // TODO: add mac to error message
+    Log::error("Received malformed message from xx");
+    return;
+  }
+
+  estop_message* incoming = (estop_message*) incomingData;
 
   if(myData.eStopFree != incoming->eStopFree)
   {
@@ -42,13 +40,6 @@ void OnDataRecv(uint8_t * mac, uint8_t *incomingData, uint8_t len) {
   {
     Serial.print("Bytes received: ");
     Serial.println(len);
-    Serial.print("Char: ");
-    Serial.println(myData.a);
-    Serial.print("Int: ");
-    Serial.println(myData.b);
-    Serial.print("Float: ");
-    Serial.println(myData.c);
-    Serial.print("Bool: ");
     Serial.println(myData.eStopFree);
     Serial.printf("> Successfully received Local MAC Address : %02x:%02x:%02x:%02x:%02x:%02x\n",
     (unsigned char) mac[0],
@@ -88,7 +79,6 @@ void setup(){
     return;
   }
   
-
   // Once ESPNow is successfully Init, we will register for recv CB to
   // get recv packer info
   esp_now_set_self_role(ESP_NOW_ROLE_SLAVE);
