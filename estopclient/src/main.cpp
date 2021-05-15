@@ -5,7 +5,7 @@
 #include <SerialLogger.h>
 
 #define BUTTON_PIN_D2 4
-#define LOOP_DELAY 1000
+#define LOOP_DELAY 20
 
 #define WIFI_CHANNEL 0
 
@@ -22,23 +22,23 @@ typedef struct struct_message {
     char a[32];
     int b;
     float c;
-    bool e;
+    bool eStopFree;
 } struct_message;
 
 // Create a struct_message called myData
 struct_message myData;
 
-unsigned long lastTime = 0;  
-unsigned long timerDelay = 2000;  // send readings timer
+
+unsigned int g_messageCounter = 0;
 
 // Callback when data is sent
 void OnDataSent(uint8_t *mac_addr, uint8_t sendStatus) {
-  Serial.print("Last Packet Send Status: ");
+  g_messageCounter++;
   if (sendStatus == 0){
-    Serial.println("Delivery success");
+    //Serial.println("Delivery success");
   }
   else{
-    Serial.println("Delivery fail");
+    Serial.printf("Delivery failed, message number: %d\n", g_messageCounter);
   }
 }
 
@@ -49,8 +49,16 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(BUTTON_PIN_D2, INPUT);
   delay(10);
+
+  // 2 = The chip won’t make RF calibration after waking up from Deep-sleep. Power consumption is low. 
+  //system_deep_sleep_set_option(2);
+
+  // delete old wifi settings
+  WiFi.disconnect();
+
     // Set device as a Wi-Fi Station
   WiFi.mode(WIFI_STA);
+  //WiFi.setSleepMode(WIFI_NONE_SLEEP);
 
   Log::info("[OLD] ESP8266 Board MAC Address: " + WiFi.macAddress());
   // For Soft Access Point (AP) Mode
@@ -90,13 +98,13 @@ void loop() {
     strcpy(myData.a, "THIS IS A CHAR");
     myData.b = random(1,20);
     myData.c = 1.2;
-    myData.e = false;
+    myData.eStopFree = eStopFree;
 
     // Send message via ESP-NOW
     esp_now_send(masterMAC, (uint8_t *) &myData, sizeof(myData));
 
     
-
     delay(LOOP_DELAY);
+    //ESP.deepSleep(LOOP_DELAY);
   }  
 }
