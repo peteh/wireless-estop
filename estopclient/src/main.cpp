@@ -4,24 +4,25 @@
 #include <Log.h>
 #include <SerialLogger.h>
 
-#include "../../common/common.h"
+#include "../../common/config.h"
+#include <common_types.h>
 
 #define BUTTON_PIN_D2 4
 #define LOOP_DELAY 20
 
 
-// Create a struct_message called myData
-estop_message myData;
+// Create a struct_message called g_sendEstopMessage
+estop_message g_sendEstopMessage;
+
 unsigned int g_messageCounter = 0;
+bool g_eStopFree = false; 
+bool g_previousEStopFree = !g_eStopFree; 
 
 // Callback when data is sent
 void OnDataSent(uint8_t *mac_addr, uint8_t sendStatus) {
   g_messageCounter++;
-  if (sendStatus == 0){
-    //Serial.println("Delivery success");
-  }
-  else{
-    Serial.printf("Delivery failed, message number: %d\n", g_messageCounter);
+  if (sendStatus != 0){
+    Log::errorf("Delivery failed, message number: %d, Error Code: %d", g_messageCounter, sendStatus);
   }
 }
 
@@ -43,12 +44,12 @@ void setup() {
   WiFi.mode(WIFI_STA);
   //WiFi.setSleepMode(WIFI_NONE_SLEEP);
 
-  Log::info("[OLD] ESP8266 Board MAC Address: " + WiFi.macAddress());
+  Log::infof("[OLD] ESP8266 Board MAC Address: %s", WiFi.macAddress().c_str());
   // For Soft Access Point (AP) Mode
   //wifi_set_macaddr(SOFTAP_IF, &newMACAddress[0]);
   // For Station Mode
-  wifi_set_macaddr(STATION_IF, &clientMAC[0]);
-  Log::info("[NEW] ESP8266 Board MAC Address: " + WiFi.macAddress());
+  wifi_set_macaddr(STATION_IF, &CLIENT_MAC[0]);
+  Log::infof("[NEW] ESP8266 Board MAC Address: %s", WiFi.macAddress().c_str());
 
   // Init ESP-NOW
   if (esp_now_init() != 0) {
@@ -62,30 +63,29 @@ void setup() {
   esp_now_register_send_cb(OnDataSent);
   
   // Register peer
-  esp_now_add_peer(masterMAC, ESP_NOW_ROLE_SLAVE, WIFI_CHANNEL, NULL, 0);
+  esp_now_add_peer(MASTER_MAC, ESP_NOW_ROLE_SLAVE, WIFI_CHANNEL, NULL, 0);
+
+  // init vars to force update
+  g_eStopFree = digitalRead(BUTTON_PIN_D2) > 0; 
+  g_previousEStopFree = !g_eStopFree; 
 }
 
 void loop() {
-  bool eStopFree = digitalRead(BUTTON_PIN_D2) > 0; 
-  bool previousEStopFree = !eStopFree; 
+  g_eStopFree = digitalRead(BUTTON_PIN_D2) > 0;
+  digitalWrite(LED_BUILTIN, g_eStopFree);
 
-  while(true){
-    eStopFree = digitalRead(BUTTON_PIN_D2) > 0;
-    digitalWrite(LED_BUILTIN, eStopFree);
+  if(g_eStopFree != g_previousEStopFree){
+    Log::infof("Estop free changed %d -> %d", g_previousEStopFree, g_eStopFree);
+  }
+  
+  g_sendEstopMessage.eStopFree = g_eStopFree;
+  g_sendEstopMessage.messageNum = g_messageCounter;
+  // Send message via ESP-NOW
+  esp_now_send(MASTER_MAC, (uint8_t *) &g_sendEstopMessage, sizeof(g_sendEstopMessage));
 
-    if(eStopFree != previousEStopFree){
-      Serial.printf("Estop free changed %d -> %d\n", previousEStopFree, eStopFree);
-    }
-    
-    myData.eStopFree = eStopFree;
-    myData.messageNum = g_messageCounter;
-    // Send message via ESP-NOW
-    esp_now_send(masterMAC, (uint8_t *) &myData, sizeof(myData));
+  
+  g_previousEStopFree = g_eStopFree;
 
-    
-    previousEStopFree = eStopFree;
-
-    delay(LOOP_DELAY);
-    //ESP.deepSleep(LOOP_DELAY);
-  }  
+  delay(LOOP_DELAY);
+  //ESP.deepSleep(LOOP_DELAY);
 }
