@@ -2,11 +2,7 @@
 #define ESTOP_RECEIVER_H
 
 #include <Arduino.h>
-#include "../../common/common_types.h"
-
-
-
-
+#include "common_types.h"
 
 class EStopReceiver{
     public: 
