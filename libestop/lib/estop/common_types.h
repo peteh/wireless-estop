@@ -6,9 +6,10 @@
 typedef struct estop_message {
     //char a[32];
     //int b;
-    //float c;
+    
     unsigned int messageNum;
     bool eStopFree;
+    float batteryVoltage;
 } estop_message;
 
 

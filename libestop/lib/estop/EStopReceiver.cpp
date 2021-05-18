@@ -80,37 +80,47 @@ void EStopReceiver::messageCallBack(uint8_t *mac, uint8_t *incomingData, uint8_t
         //Log::infof("Bytes received: %d", len);
         //Log::infof("EStop free: %d", m_estop_message.eStopFree);
         Log::infof("> Successfully received Local MAC Address : %02x:%02x:%02x:%02x:%02x:%02x\n",
-                      (unsigned char)mac[0],
-                      (unsigned char)mac[1],
-                      (unsigned char)mac[2],
-                      (unsigned char)mac[3],
-                      (unsigned char)mac[4],
-                      (unsigned char)mac[5]);
+                   (unsigned char)mac[0],
+                   (unsigned char)mac[1],
+                   (unsigned char)mac[2],
+                   (unsigned char)mac[3],
+                   (unsigned char)mac[4],
+                   (unsigned char)mac[5]);
     }
     m_messageCounter++;
 }
 
 bool EStopReceiver::isEStopFree()
 {
-    if(isTimedout()){
+    if (isTimedout())
+    {
         return false;
     }
     return m_estop_message.eStopFree;
 }
 
-EStopReceiver::EStopState EStopReceiver::getEStopState(){
-    if(isTimedout()){
+EStopReceiver::EStopState EStopReceiver::getEStopState()
+{
+    if (isTimedout())
+    {
         return ESTOP_TIMEOUT;
     }
-    if(isEStopFree())
+    if (isEStopFree())
     {
         return ESTOP_FREE;
     }
-    else{
+    else
+    {
         return ESTOP_ACTIVE;
     }
 }
 
-bool EStopReceiver::isTimedout(){
+float EStopReceiver::getBatteryVoltage()
+{
+    return m_estop_message.batteryVoltage;
+}
+
+bool EStopReceiver::isTimedout()
+{
     return millis() > m_lastMessageTimestamp + m_timeoutMs;
 }

@@ -7,9 +7,9 @@
 #include "../../common/config.h"
 #include <common_types.h>
 
-#define BUTTON_PIN_D2 4
+#define BUTTON_PIN_D2 D2
 #define LOOP_DELAY 20
-
+#define ANALOG_PIN_A0 A0
 
 // Create a struct_message called g_sendEstopMessage
 estop_message g_sendEstopMessage;
@@ -17,12 +17,13 @@ estop_message g_sendEstopMessage;
 unsigned int g_messageCounter = 0;
 bool g_eStopFree = false; 
 bool g_previousEStopFree = !g_eStopFree; 
+float g_voltage;
 
 // Callback when data is sent
 void OnDataSent(uint8_t *mac_addr, uint8_t sendStatus) {
   g_messageCounter++;
   if (sendStatus != 0){
-    Log::errorf("Delivery failed, message number: %d, Error Code: %d", g_messageCounter, sendStatus);
+    //Log::errorf("Delivery failed, message number: %d, Error Code: %d", g_messageCounter, sendStatus);
   }
 }
 
@@ -32,6 +33,8 @@ void setup() {
   Serial.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(BUTTON_PIN_D2, INPUT);
+  pinMode(ANALOG_PIN_A0, INPUT);
+
   delay(10);
 
   // 2 = The chip won’t make RF calibration after waking up from Deep-sleep. Power consumption is low. 
@@ -72,14 +75,23 @@ void setup() {
 
 void loop() {
   g_eStopFree = digitalRead(BUTTON_PIN_D2) > 0;
+
+float raw = analogRead(A0);
+  g_voltage =raw/1023.0 * 4.2;
+
   digitalWrite(LED_BUILTIN, g_eStopFree);
 
   if(g_eStopFree != g_previousEStopFree){
     Log::infof("Estop free changed %d -> %d", g_previousEStopFree, g_eStopFree);
+    Log::infof("Voltage: %f", g_voltage);
   }
+
+  
+
   
   g_sendEstopMessage.eStopFree = g_eStopFree;
   g_sendEstopMessage.messageNum = g_messageCounter;
+  g_sendEstopMessage.batteryVoltage = g_voltage;
   // Send message via ESP-NOW
   esp_now_send(MASTER_MAC, (uint8_t *) &g_sendEstopMessage, sizeof(g_sendEstopMessage));
 

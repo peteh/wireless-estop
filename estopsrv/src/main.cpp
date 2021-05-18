@@ -56,7 +56,10 @@ void loop()
 
   if (g_eStopState != eStopState)
   {
-    Log::infof("EStop State changed: %s -> %s", eStopStateToStr(g_eStopState).c_str(), eStopStateToStr(eStopState).c_str());
+    Log::infof("EStop State changed: %s -> %s (Battery: %fV)",
+               eStopStateToStr(g_eStopState).c_str(), 
+               eStopStateToStr(eStopState).c_str(), 
+               g_estopReceiver->getBatteryVoltage());
   }
 
   digitalWrite(LED_BUILTIN, eStopState == EStopReceiver::ESTOP_FREE);

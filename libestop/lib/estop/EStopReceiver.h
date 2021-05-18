@@ -14,6 +14,7 @@ class EStopReceiver{
         bool isTimedout();
 
         EStopState getEStopState();
+        float getBatteryVoltage();
 
     private:
         static void messageCallBackStatic(uint8_t * mac, uint8_t *incomingData, uint8_t len);
