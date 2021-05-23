@@ -1,4 +1,4 @@
-# remote-estop
+# wireless-estop
 This project realizes a wireless E-Stop. It will handle the state of the actual button and also handle connection losses. 
 
 The reaction time is configurable. 
