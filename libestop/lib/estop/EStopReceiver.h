@@ -25,8 +25,14 @@ namespace estop
         float getBatteryVoltage();
 
     private:
-        static void messageCallBackStatic(uint8_t *mac, uint8_t *incomingData, uint8_t len);
-        void messageCallBack(uint8_t *mac, uint8_t *incomingData, uint8_t len);
+        
+        #ifdef ESP32
+            static void messageCallBackStatic(const unsigned char *mac, const unsigned char *incomingData, int len);
+        #else
+            static void messageCallBackStatic(uint8_t *mac, uint8_t *incomingData, uint8_t len);
+        #endif
+
+        void messageCallBack(const uint8_t *mac, const uint8_t *incomingData, uint8_t len);
 
         uint8_t m_clientMAC[6] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
         uint m_messageCounter = 0;

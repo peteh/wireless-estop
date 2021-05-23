@@ -15,8 +15,14 @@ namespace estop
         void sendState(bool eStopFree, float batteryVoltage);
 
     private:
-        static void messageSentCallBackStatic(uint8_t *mac_addr, uint8_t sendStatus);
-        void messageSentCallBack(uint8_t *mac_addr, uint8_t sendStatus);
+
+        #ifdef ESP32
+            static void messageSentCallBackStatic(const uint8_t *mac_addr, esp_now_send_status_t sendStatus);
+        #else
+            static void messageSentCallBackStatic(uint8_t *mac_addr, uint8_t sendStatus);
+        #endif
+        
+        void messageSentCallBack(const uint8_t *mac_addr, uint8_t sendStatus);
 
         uint8_t m_wifiChannel = 0;
 

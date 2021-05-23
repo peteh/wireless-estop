@@ -1,5 +1,11 @@
-#include <ESP8266WiFi.h>
-#include <espnow.h>
+#ifdef ESP32
+  #include <WiFi.h>
+  #include <esp_now.h>
+#else
+  #include <ESP8266WiFi.h>
+  #include <espnow.h>
+#endif
+
 #include "EStopSender.h"
 #include <Log.h>
 
@@ -15,11 +21,11 @@ namespace estop
         m_estop_message.messageNum = 0;
         m_estop_message.eStopFree = false;
         m_estop_message.cellId = cellId;
-        m_estop_message.header[0] = 'E';
-        m_estop_message.header[1] = 'S';
-        m_estop_message.header[2] = 'T';
-        m_estop_message.header[3] = 'O';
-        m_estop_message.header[4] = 'P';
+        m_estop_message.head[0] = 'E';
+        m_estop_message.head[1] = 'S';
+        m_estop_message.head[2] = 'T';
+        m_estop_message.head[3] = 'O';
+        m_estop_message.head[4] = 'P';
     }
 
     bool EStopSender::init()
@@ -40,21 +46,41 @@ namespace estop
 
         // Once ESPNow is successfully Init, we will register for recv CB to
         // get recv packer info
-        esp_now_set_self_role(ESP_NOW_ROLE_CONTROLLER);
+        
+        
+
+        #ifdef ESP32
+            // nothing
+        #else
+            esp_now_set_self_role(ESP_NOW_ROLE_CONTROLLER);
+        #endif
+
         esp_now_register_send_cb(EStopSender::messageSentCallBackStatic);
 
         return true;
     }
 
-    // HACK: ugly hack to call our member function because espnow does not allow
-    // registering non static functions
-    void EStopSender::messageSentCallBackStatic(uint8_t *mac_addr, uint8_t sendStatus)
-    {
-        m_instance->messageSentCallBack(mac_addr, sendStatus);
-    }
+    #ifdef ESP32
+        // HACK: ugly hack to call our member function because espnow does not allow
+        // registering non static functions
+        void EStopSender::messageSentCallBackStatic(const uint8_t *mac_addr, esp_now_send_status_t sendStatus)
+        {
+            // TODO: fix send status
+            m_instance->messageSentCallBack(mac_addr, (uint8_t) 0);
+        }
+
+    #else
+        // HACK: ugly hack to call our member function because espnow does not allow
+        // registering non static functions
+        void EStopSender::messageSentCallBackStatic(uint8_t *mac_addr, uint8_t sendStatus)
+        {
+            m_instance->messageSentCallBack(mac_addr, sendStatus);
+        }
+    #endif
+    
 
     // Callback function that will be executed when data is received
-    void EStopSender::messageSentCallBack(uint8_t *mac_addr, uint8_t sendStatus)
+    void EStopSender::messageSentCallBack(const uint8_t *mac_addr, uint8_t sendStatus)
     {
         m_estop_message.messageNum++;
     }

@@ -5,7 +5,7 @@
 // Must match the sender structure
 namespace estop{
     typedef struct estop_message {
-        char header[5]; // ESTOP
+        char head[5]; // ESTOP
         uint8_t messageNum;
         uint8_t cellId; 
         bool eStopFree;
