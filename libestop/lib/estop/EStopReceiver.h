@@ -8,7 +8,7 @@ class EStopReceiver{
     public: 
         enum EStopState { ESTOP_FREE, ESTOP_ACTIVE, ESTOP_TIMEOUT };
         
-        EStopReceiver(const uint8_t *clientMac, uint8_t wifiChannel, unsigned long timeoutMs);
+        EStopReceiver(const uint8_t *clientMac, uint8_t wifiChannel, uint8_t cellId, unsigned long timeoutMs);
         bool init();
         bool isEStopFree();
         bool isTimedout();
@@ -23,6 +23,7 @@ class EStopReceiver{
         uint8_t m_clientMAC[6] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
         uint m_messageCounter = 0;
         uint8_t m_wifiChannel = 0;
+        uint8_t m_cellId = 0;
 
         estop_message m_estop_message;
         unsigned long m_lastMessageTimestamp;

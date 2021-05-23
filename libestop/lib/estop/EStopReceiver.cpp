@@ -7,12 +7,18 @@
 // be possible to static functions
 EStopReceiver *EStopReceiver::m_instance = NULL;
 
-EStopReceiver::EStopReceiver(const uint8_t *clientMac, uint8_t wifiChannel, unsigned long timeoutMs)
+EStopReceiver::EStopReceiver(const uint8_t *clientMac, uint8_t wifiChannel, const uint8_t cellId, unsigned long timeoutMs)
     : m_wifiChannel(wifiChannel),
+      m_cellId(cellId),
       m_lastMessageTimestamp(0),
       m_timeoutMs(timeoutMs)
 {
     memcpy(&m_clientMAC[0], clientMac, sizeof(m_clientMAC));
+    m_estop_message.header[0] = 'E';
+    m_estop_message.header[1] = 'S';
+    m_estop_message.header[2] = 'T';
+    m_estop_message.header[3] = 'O';
+    m_estop_message.header[4] = 'P';
     m_estop_message.messageNum = 0;
     m_estop_message.eStopFree = false;
 }
@@ -52,6 +58,7 @@ void EStopReceiver::messageCallBackStatic(uint8_t *mac, uint8_t *incomingData, u
 // Callback function that will be executed when data is received
 void EStopReceiver::messageCallBack(uint8_t *mac, uint8_t *incomingData, uint8_t len)
 {
+    
     if (memcmp(mac, m_clientMAC, sizeof(m_clientMAC)) != 0)
     {
         // TODO: add mac to error message
@@ -67,9 +74,25 @@ void EStopReceiver::messageCallBack(uint8_t *mac, uint8_t *incomingData, uint8_t
     }
 
     estop_message *incoming = (estop_message *)incomingData;
+    char estopHeader[] = "ESTOP";
+
+    if (memcmp(incoming, &estopHeader[0], 5) != 0)
+    {
+        // TODO: add mac to error message
+        Log::error("Header mismatch, expected: 'ESTOP'");
+        return;
+    }
+
+    if (incoming->cellId != m_cellId)
+    {
+        Log::errorf("Cell id mismatch, ignoring message (expected: %d, is: %d)", m_cellId, incoming->cellId);
+        return;
+    }
+
 
     if (m_estop_message.eStopFree != incoming->eStopFree)
     {
+        // TODO add callback function
         //Serial.printf("Estop free changed %d -> %d\n", m_estop_message.eStopFree, incoming->eStopFree);
     }
 

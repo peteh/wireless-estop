@@ -29,7 +29,7 @@ void setup()
   //disable sleep mode
   //WiFi.setSleepMode(WIFI_NONE_SLEEP);
 
-  g_estopReceiver = new EStopReceiver(CLIENT_MAC, WIFI_CHANNEL, 100);
+  g_estopReceiver = new EStopReceiver(CLIENT_MAC, WIFI_CHANNEL, CELL_ID, 100);
   g_estopReceiver->init();
 }
 
