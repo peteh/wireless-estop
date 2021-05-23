@@ -26,10 +26,7 @@ void setup()
 
   delay(10);
 
-  // 2 = The chip won’t make RF calibration after waking up from Deep-sleep. Power consumption is low.
-  //system_deep_sleep_set_option(2);
-
-  // delete old wifi settings
+    // delete old wifi settings
   WiFi.disconnect();
 
   // Set device as a Wi-Fi Station
@@ -49,7 +46,7 @@ void setup()
   g_eStopSender->init();
 
   // Register peer
-  // TODO: we only use broadcast, no need to add as peer
+  // TODO: we only use broadcast, no need to add base station as as peer
   //esp_now_add_peer(BASE_STATION_MAC, ESP_NOW_ROLE_SLAVE, WIFI_CHANNEL, NULL, 0);
   
   // init vars to force update
