@@ -7,21 +7,24 @@
 // be possible to static functions
 EStopSender *EStopSender::m_instance = NULL;
 
-EStopSender::EStopSender(const uint8_t *clientMac, uint8_t wifiChannel, unsigned long timeoutMs)
-    : m_wifiChannel(wifiChannel),
-      m_lastMessageTimestamp(0),
-      m_timeoutMs(timeoutMs)
+EStopSender::EStopSender(uint8_t wifiChannel, uint8_t cellId)
+    : m_wifiChannel(wifiChannel)
 {
-    memcpy(&m_clientMAC[0], clientMac, sizeof(m_clientMAC));
     m_estop_message.messageNum = 0;
     m_estop_message.eStopFree = false;
+    m_estop_message.cellId = cellId;
+    m_estop_message.header[0] = 'E';
+    m_estop_message.header[1] = 'S';
+    m_estop_message.header[2] = 'T';
+    m_estop_message.header[3] = 'O';
+    m_estop_message.header[4] = 'P';
 }
 
 bool EStopSender::init()
 {
     if (m_instance != NULL)
     {
-        Log::error("EStopReceiver initialized multiple times but should only be done once");
+        Log::error("EStopSender initialized multiple times but should only be done once");
         return false;
     }
     EStopSender::m_instance = this;
@@ -35,57 +38,31 @@ bool EStopSender::init()
 
     // Once ESPNow is successfully Init, we will register for recv CB to
     // get recv packer info
-    esp_now_set_self_role(ESP_NOW_ROLE_SLAVE);
-    esp_now_register_recv_cb(EStopSender::messageSentCallBackStatic);
-    esp_now_add_peer(m_clientMAC, ESP_NOW_ROLE_CONTROLLER, m_wifiChannel, NULL, 0);
+    esp_now_set_self_role(ESP_NOW_ROLE_CONTROLLER);
+    esp_now_register_send_cb(EStopSender::messageSentCallBackStatic);
 
     return true;
 }
 
 // HACK: ugly hack to call our member function because espnow does not allow
 // registering non static functions
-void EStopSender::messageSentCallBackStatic(uint8_t *mac, uint8_t *incomingData, uint8_t len)
+void EStopSender::messageSentCallBackStatic(uint8_t *mac_addr, uint8_t sendStatus)
 {
-    m_instance->messageSentCallBack(mac, incomingData, len);
+    m_instance->messageSentCallBack(mac_addr, sendStatus);
 }
 
 // Callback function that will be executed when data is received
-void EStopSender::messageSentCallBack(uint8_t *mac, uint8_t *incomingData, uint8_t len)
+void EStopSender::messageSentCallBack(uint8_t *mac_addr, uint8_t sendStatus)
 {
-    if (memcmp(mac, m_clientMAC, sizeof(m_clientMAC)) != 0)
-    {
-        // TODO: add mac to error message
-        Log::error("Received unexpected message from xx");
-        return;
-    }
+    m_estop_message.messageNum++;
+}
 
-    if (len != sizeof(estop_message))
-    {
-        // TODO: add mac to error message
-        Log::error("Received malformed message from xx");
-        return;
-    }
+void EStopSender::sendState(bool eStopFree, float batteryVoltage)
+{
+    m_estop_message.batteryVoltage = batteryVoltage;
+    m_estop_message.eStopFree = eStopFree;
 
-    estop_message *incoming = (estop_message *)incomingData;
-
-    if (m_estop_message.eStopFree != incoming->eStopFree)
-    {
-        //Serial.printf("Estop free changed %d -> %d\n", m_estop_message.eStopFree, incoming->eStopFree);
-    }
-
-    memcpy(&m_estop_message, incomingData, sizeof(m_estop_message));
-    m_lastMessageTimestamp = millis();
-    if (false)
-    {
-        //Log::infof("Bytes received: %d", len);
-        //Log::infof("EStop free: %d", m_estop_message.eStopFree);
-        Log::infof("> Successfully received Local MAC Address : %02x:%02x:%02x:%02x:%02x:%02x\n",
-                      (unsigned char)mac[0],
-                      (unsigned char)mac[1],
-                      (unsigned char)mac[2],
-                      (unsigned char)mac[3],
-                      (unsigned char)mac[4],
-                      (unsigned char)mac[5]);
-    }
-    m_messageCounter++;
+    // Broadcast address
+    uint8_t broadcastMac[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+    esp_now_send(broadcastMac, (uint8_t *)&m_estop_message, sizeof(m_estop_message));
 }

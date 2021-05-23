@@ -26,14 +26,14 @@ void setup()
 
   Log::infof("[OLD] ESP8266 Board MAC Address: %s", WiFi.macAddress().c_str());
   // For Station Mode
-  wifi_set_macaddr(STATION_IF, &MASTER_MAC[0]);
+  wifi_set_macaddr(STATION_IF, &BASE_STATION_MAC[0]);
   Log::infof("[NEW] ESP8266 Board MAC Address: %s", WiFi.macAddress().c_str());
 
   WiFi.mode(WIFI_STA); // Place in station mode for ESP-NOW sender node
   //disable sleep mode
   //WiFi.setSleepMode(WIFI_NONE_SLEEP);
 
-  g_estopReceiver = new EStopReceiver(CLIENT_MAC, WIFI_CHANNEL, CELL_ID, MSG_TIME_MS * SKIP_BEFORE_TIMEOUT);
+  g_estopReceiver = new EStopReceiver(BUTTON_STATION_MAC, WIFI_CHANNEL, CELL_ID, MSG_TIME_MS * SKIP_BEFORE_TIMEOUT);
   g_estopReceiver->init();
 }
 
