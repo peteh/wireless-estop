@@ -1,4 +1,6 @@
 # wireless-estop
+**WARNING:** I am not a safety engineer. Therefore the concept that is used and its implementation should not be used in systems that can harm anybody. I take no responsibility for the use or misuse of the system. 
+
 <p align="center">
 
 ![Base station wired to relay](./doc/gif/estop_relay.gif)
