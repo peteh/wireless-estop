@@ -40,7 +40,7 @@ bool EStopReceiver::init()
     }
 
     // Once ESPNow is successfully Init, we will register for recv CB to
-    // get recv packer info
+    // get recv packet info
     esp_now_set_self_role(ESP_NOW_ROLE_SLAVE);
     esp_now_register_recv_cb(EStopReceiver::messageCallBackStatic);
     esp_now_add_peer(m_clientMAC, ESP_NOW_ROLE_CONTROLLER, m_wifiChannel, NULL, 0);
