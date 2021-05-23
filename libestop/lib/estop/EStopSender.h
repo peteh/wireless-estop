@@ -4,8 +4,11 @@
 #include <Arduino.h>
 #include "common_types.h"
 
-class EStopSender{
-    public: 
+namespace estop
+{
+    class EStopSender
+    {
+    public:
         EStopSender(uint8_t wifiChannel, uint8_t cellId);
         bool init();
 
@@ -17,8 +20,8 @@ class EStopSender{
 
         uint8_t m_wifiChannel = 0;
 
-        estop_message m_estop_message;
+        estop::estop_message m_estop_message;
         static EStopSender *m_instance;
-};
-
+    };
+}
 #endif

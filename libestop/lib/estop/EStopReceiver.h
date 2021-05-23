@@ -4,10 +4,18 @@
 #include <Arduino.h>
 #include "common_types.h"
 
-class EStopReceiver{
-    public: 
-        enum EStopState { ESTOP_FREE, ESTOP_ACTIVE, ESTOP_TIMEOUT };
-        
+namespace estop
+{
+    class EStopReceiver
+    {
+    public:
+        enum EStopState
+        {
+            ESTOP_FREE,
+            ESTOP_ACTIVE,
+            ESTOP_TIMEOUT
+        };
+
         EStopReceiver(const uint8_t *clientMac, uint8_t wifiChannel, uint8_t cellId, unsigned long timeoutMs);
         bool init();
         bool isEStopFree();
@@ -17,8 +25,8 @@ class EStopReceiver{
         float getBatteryVoltage();
 
     private:
-        static void messageCallBackStatic(uint8_t * mac, uint8_t *incomingData, uint8_t len);
-        void messageCallBack(uint8_t * mac, uint8_t *incomingData, uint8_t len);
+        static void messageCallBackStatic(uint8_t *mac, uint8_t *incomingData, uint8_t len);
+        void messageCallBack(uint8_t *mac, uint8_t *incomingData, uint8_t len);
 
         uint8_t m_clientMAC[6] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
         uint m_messageCounter = 0;
@@ -29,6 +37,6 @@ class EStopReceiver{
         unsigned long m_lastMessageTimestamp;
         unsigned long m_timeoutMs;
         static EStopReceiver *m_instance;
-};
-
+    };
+}
 #endif

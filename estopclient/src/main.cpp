@@ -13,7 +13,7 @@
 
 bool g_previousEStopFree = false;
 
-EStopSender* g_eStopSender;
+estop::EStopSender* g_eStopSender;
 
 void setup()
 {
@@ -40,7 +40,7 @@ void setup()
   wifi_set_macaddr(STATION_IF, &BUTTON_STATION_MAC[0]);
   Log::infof("[NEW] ESP8266 Board MAC Address: %s", WiFi.macAddress().c_str());
 
-  g_eStopSender = new EStopSender(WIFI_CHANNEL, CELL_ID);
+  g_eStopSender = new estop::EStopSender(WIFI_CHANNEL, CELL_ID);
 
   // init communication
   g_eStopSender->init();

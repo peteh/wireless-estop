@@ -8,7 +8,7 @@
 
 #define PIN_RELAY D2
 
-EStopReceiver *g_estopReceiver;
+estop::EStopReceiver *g_estopReceiver;
 
 void setup()
 {
@@ -33,21 +33,21 @@ void setup()
   //disable sleep mode
   //WiFi.setSleepMode(WIFI_NONE_SLEEP);
 
-  g_estopReceiver = new EStopReceiver(BUTTON_STATION_MAC, WIFI_CHANNEL, CELL_ID, MSG_TIME_MS * SKIP_BEFORE_TIMEOUT);
+  g_estopReceiver = new estop::EStopReceiver(BUTTON_STATION_MAC, WIFI_CHANNEL, CELL_ID, MSG_TIME_MS * SKIP_BEFORE_TIMEOUT);
   g_estopReceiver->init();
 }
 
-EStopReceiver::EStopState g_eStopState = EStopReceiver::ESTOP_ACTIVE;
+estop::EStopReceiver::EStopState g_eStopState = estop::EStopReceiver::ESTOP_ACTIVE;
 
-String eStopStateToStr(EStopReceiver::EStopState eStopState)
+String eStopStateToStr(estop::EStopReceiver::EStopState eStopState)
 {
   switch (eStopState)
   {
-  case EStopReceiver::ESTOP_ACTIVE:
+  case estop::EStopReceiver::ESTOP_ACTIVE:
     return "ESTOP_ACTIVE";
-  case EStopReceiver::ESTOP_FREE:
+  case estop::EStopReceiver::ESTOP_FREE:
     return "ESTOP_FREE";
-  case EStopReceiver::ESTOP_TIMEOUT:
+  case estop::EStopReceiver::ESTOP_TIMEOUT:
     return "ESTOP_TIMEOUT";
   default:
     return "UNDEFINED_TYPE";
@@ -56,7 +56,7 @@ String eStopStateToStr(EStopReceiver::EStopState eStopState)
 void loop()
 {
 
-  EStopReceiver::EStopState eStopState = g_estopReceiver->getEStopState();
+  estop::EStopReceiver::EStopState eStopState = g_estopReceiver->getEStopState();
 
   if (g_eStopState != eStopState)
   {
@@ -66,8 +66,8 @@ void loop()
                g_estopReceiver->getBatteryVoltage());
   }
 
-  digitalWrite(LED_BUILTIN, eStopState == EStopReceiver::ESTOP_FREE);
-  digitalWrite(PIN_RELAY, eStopState == EStopReceiver::ESTOP_FREE);
+  digitalWrite(LED_BUILTIN, eStopState == estop::EStopReceiver::ESTOP_FREE);
+  digitalWrite(PIN_RELAY, eStopState == estop::EStopReceiver::ESTOP_FREE);
   g_eStopState = eStopState;
   // TODO I think we can make this loop event driven and make it sleep more
 }
