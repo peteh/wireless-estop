@@ -10,6 +10,13 @@ uint8_t  WIFI_CHANNEL = 0;
 // will drop and ignore the message. 
 uint8_t CELL_ID = 10;
 
+// how long we wait between sending messages
+unsigned long MSG_TIME_MS = 20;
+
+// how many messages we can lose before activating E-Stop because of 
+// message timeout
+unsigned long SKIP_BEFORE_TIMEOUT = 5;
+
 // Address of the central station
 uint8_t MASTER_MAC[] = {0xDE, 0xAD, 0x13, 0x37, 0x00, 0x01};
 

@@ -8,7 +8,6 @@
 #include <common_types.h>
 
 #define BUTTON_PIN_D2 D2
-#define LOOP_DELAY 20
 #define ANALOG_PIN_A0 A0
 
 // Create a struct_message called g_sendEstopMessage
@@ -112,6 +111,6 @@ void loop()
 
   g_previousEStopFree = g_eStopFree;
 
-  delay(LOOP_DELAY);
+  delay(MSG_TIME_MS);
   //ESP.deepSleep(LOOP_DELAY);
 }

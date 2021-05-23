@@ -6,6 +6,8 @@
 #include <EStopReceiver.h>
 #include "../../common/config.h"
 
+#define PIN_RELAY D2
+
 EStopReceiver *g_estopReceiver;
 
 void setup()
@@ -16,6 +18,8 @@ void setup()
   Serial.println();
 
   pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(PIN_RELAY, OUTPUT);
+
 
   // delete old wifi settings
   WiFi.disconnect();
@@ -29,7 +33,7 @@ void setup()
   //disable sleep mode
   //WiFi.setSleepMode(WIFI_NONE_SLEEP);
 
-  g_estopReceiver = new EStopReceiver(CLIENT_MAC, WIFI_CHANNEL, CELL_ID, 100);
+  g_estopReceiver = new EStopReceiver(CLIENT_MAC, WIFI_CHANNEL, CELL_ID, MSG_TIME_MS * SKIP_BEFORE_TIMEOUT);
   g_estopReceiver->init();
 }
 
@@ -63,6 +67,7 @@ void loop()
   }
 
   digitalWrite(LED_BUILTIN, eStopState == EStopReceiver::ESTOP_FREE);
+  digitalWrite(PIN_RELAY, eStopState == EStopReceiver::ESTOP_FREE);
   g_eStopState = eStopState;
   // TODO I think we can make this loop event driven and make it sleep more
 }
