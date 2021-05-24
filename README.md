@@ -39,10 +39,8 @@ Base station wired to relay on breadboard</p>
 The E-Stop housing was bought as it is and modified by drilling and cutting the necessary holes into it. 
 
 <p align="center">
-
-![Button pressed with blue LED on the side](./doc/img/button_pressed.jpg)
-
-*Button pressed with blue LED on the side*</p>
+<img src="./doc/img/button_pressed.jpg" /><br/>
+Button pressed with blue LED on the side</p>
 
 <p align="center">
 <img src="./doc/img/button_charging.jpg" /><br/>
