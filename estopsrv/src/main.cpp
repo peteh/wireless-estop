@@ -37,17 +37,17 @@ void setup()
   g_estopReceiver->init();
 }
 
-estop::EStopReceiver::EStopState g_eStopState = estop::EStopReceiver::ESTOP_ACTIVE;
+estop::EStopState g_eStopState = estop::ESTOP_ACTIVE;
 
-String eStopStateToStr(estop::EStopReceiver::EStopState eStopState)
+String eStopStateToStr(estop::EStopState eStopState)
 {
   switch (eStopState)
   {
-  case estop::EStopReceiver::ESTOP_ACTIVE:
+  case estop::ESTOP_ACTIVE:
     return "ESTOP_ACTIVE";
-  case estop::EStopReceiver::ESTOP_FREE:
+  case estop::ESTOP_FREE:
     return "ESTOP_FREE";
-  case estop::EStopReceiver::ESTOP_TIMEOUT:
+  case estop::ESTOP_TIMEOUT:
     return "ESTOP_TIMEOUT";
   default:
     return "UNDEFINED_TYPE";
@@ -56,7 +56,7 @@ String eStopStateToStr(estop::EStopReceiver::EStopState eStopState)
 void loop()
 {
 
-  estop::EStopReceiver::EStopState eStopState = g_estopReceiver->getEStopState();
+  estop::EStopState eStopState = g_estopReceiver->getEStopState();
 
   if (g_eStopState != eStopState)
   {
@@ -66,8 +66,8 @@ void loop()
                g_estopReceiver->getBatteryVoltage());
   }
 
-  digitalWrite(LED_BUILTIN, eStopState == estop::EStopReceiver::ESTOP_FREE);
-  digitalWrite(PIN_RELAY, eStopState == estop::EStopReceiver::ESTOP_FREE);
+  digitalWrite(LED_BUILTIN, eStopState == estop::ESTOP_FREE);
+  digitalWrite(PIN_RELAY, eStopState == estop::ESTOP_FREE);
   g_eStopState = eStopState;
   // TODO I think we can make this loop event driven and make it sleep more
 }

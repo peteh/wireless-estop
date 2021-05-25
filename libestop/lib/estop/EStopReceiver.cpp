@@ -29,6 +29,7 @@ namespace estop
         m_estop_message.head[4] = 'P';
         m_estop_message.messageNum = 0;
         m_estop_message.eStopFree = false;
+        m_estop_message.batteryVoltage = 0.;
     }
 
     bool EStopReceiver::init()
@@ -92,7 +93,6 @@ namespace estop
                  break;
             }
             if ( code != ESP_OK) {
-                // TODO log something
                 Log::errorf("Failed adding peer with code: %d", code);
             }  
         #else
@@ -121,17 +121,30 @@ namespace estop
     // Callback function that will be executed when data is received
     void EStopReceiver::messageCallBack(const uint8_t *mac, const uint8_t *incomingData, uint8_t len)
     {
+
         if (memcmp(mac, m_clientMAC, sizeof(m_clientMAC)) != 0)
         {
-            // TODO: add mac to error message
-            Log::error("Received unexpected message from xx");
+            Log::errorf("Received unexpected message from from unexpected MAC: %02x:%02x:%02x:%02x:%02x:%02x",
+                       (unsigned char)mac[0],
+                       (unsigned char)mac[1],
+                       (unsigned char)mac[2],
+                       (unsigned char)mac[3],
+                       (unsigned char)mac[4],
+                       (unsigned char)mac[5]);
             return;
         }
 
         if (len != sizeof(estop_message))
         {
-            // TODO: add mac to error message
-            Log::error("Received malformed message from xx");
+            Log::errorf("Received wrong length message from MAC: %02x:%02x:%02x:%02x:%02x:%02x (expected: %d, is: %d)",
+                       (unsigned char)mac[0],
+                       (unsigned char)mac[1],
+                       (unsigned char)mac[2],
+                       (unsigned char)mac[3],
+                       (unsigned char)mac[4],
+                       (unsigned char)mac[5],
+                       sizeof(estop_message),
+                       len);
             return;
         }
 
@@ -140,8 +153,13 @@ namespace estop
 
         if (memcmp(incoming, &estopHeader[0], 5) != 0)
         {
-            // TODO: add mac to error message
-            Log::error("Header mismatch, expected: 'ESTOP'");
+            Log::errorf("Header mismatch, expected: 'ESTOP' from MAC: %02x:%02x:%02x:%02x:%02x:%02x",
+                       (unsigned char)mac[0],
+                       (unsigned char)mac[1],
+                       (unsigned char)mac[2],
+                       (unsigned char)mac[3],
+                       (unsigned char)mac[4],
+                       (unsigned char)mac[5]);
             return;
         }
 
@@ -155,22 +173,9 @@ namespace estop
         {
             Log::infof("Estop changed: %d", incoming->eStopFree);
             // TODO add callback function
-            //Serial.printf("Estop free changed %d -> %d\n", m_estop_message.eStopFree, incoming->eStopFree);
         }
         memcpy(&m_estop_message, incomingData, sizeof(m_estop_message));
         m_lastMessageTimestamp = millis();
-        if (false)
-        {
-            //Log::infof("Bytes received: %d", len);
-            //Log::infof("EStop free: %d", m_estop_message.eStopFree);
-            Log::infof("> Successfully received Local MAC Address : %02x:%02x:%02x:%02x:%02x:%02x\n",
-                       (unsigned char)mac[0],
-                       (unsigned char)mac[1],
-                       (unsigned char)mac[2],
-                       (unsigned char)mac[3],
-                       (unsigned char)mac[4],
-                       (unsigned char)mac[5]);
-        }
         m_messageCounter++;
     }
 
@@ -183,7 +188,7 @@ namespace estop
         return m_estop_message.eStopFree;
     }
 
-    EStopReceiver::EStopState EStopReceiver::getEStopState()
+    EStopState EStopReceiver::getEStopState()
     {
         if (isTimedout())
         {
@@ -193,10 +198,7 @@ namespace estop
         {
             return ESTOP_FREE;
         }
-        else
-        {
-            return ESTOP_ACTIVE;
-        }
+        return ESTOP_ACTIVE;
     }
 
     float EStopReceiver::getBatteryVoltage()

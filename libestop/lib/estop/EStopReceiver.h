@@ -3,19 +3,14 @@
 
 #include <Arduino.h>
 #include "common_types.h"
+#include "EStop.h"
 
 namespace estop
 {
     class EStopReceiver
     {
     public:
-        enum EStopState
-        {
-            ESTOP_FREE,
-            ESTOP_ACTIVE,
-            ESTOP_TIMEOUT
-        };
-
+        
         EStopReceiver(const uint8_t *clientMac, uint8_t wifiChannel, uint8_t cellId, unsigned long timeoutMs);
         bool init();
         bool isEStopFree();

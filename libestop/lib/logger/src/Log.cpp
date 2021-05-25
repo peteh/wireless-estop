@@ -2,7 +2,7 @@
 #include "CoutLogger.h"
 #include <cstdio>
 
-Log *Log::m_instance = NULL;
+Log *Log::m_instance = nullptr;
 
 void Log::init(ILogger *log)
 {
