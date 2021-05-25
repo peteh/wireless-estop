@@ -37,7 +37,7 @@ void setup()
   g_estopReceiver->init();
 }
 
-estop::EStopState g_eStopState = estop::ESTOP_ACTIVE;
+estop::EStopState g_previousEStopState = estop::ESTOP_ACTIVE;
 
 String eStopStateToStr(estop::EStopState eStopState)
 {
@@ -58,16 +58,16 @@ void loop()
 
   estop::EStopState eStopState = g_estopReceiver->getEStopState();
 
-  if (g_eStopState != eStopState)
+  if (g_previousEStopState != eStopState)
   {
     Log::infof("EStop State changed: %s -> %s (Battery: %fV)",
-               eStopStateToStr(g_eStopState).c_str(), 
+               eStopStateToStr(g_previousEStopState).c_str(), 
                eStopStateToStr(eStopState).c_str(), 
                g_estopReceiver->getBatteryVoltage());
   }
 
   digitalWrite(LED_BUILTIN, eStopState == estop::ESTOP_FREE);
   digitalWrite(PIN_RELAY, eStopState == estop::ESTOP_FREE);
-  g_eStopState = eStopState;
+  g_previousEStopState = eStopState;
   // TODO I think we can make this loop event driven and make it sleep more
 }
