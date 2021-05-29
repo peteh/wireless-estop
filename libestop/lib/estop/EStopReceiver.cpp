@@ -71,7 +71,7 @@ namespace estop
             switch(code)
             {
                 case ESP_OK: 
-                    Log::info("ESP_OK");
+                    // nothing to do
                     break;
                 case ESP_ERR_ESPNOW_NOT_INIT: 
                     Log::info("ESP_ERR_ESPNOW_NOT_INIT");
@@ -171,8 +171,8 @@ namespace estop
 
         if (m_estop_message.eStopFree != incoming->eStopFree)
         {
-            Log::infof("Estop changed: %d", incoming->eStopFree);
-            // TODO add callback function
+            // TODO add callback function, but update state first and then calculate full state
+            // this place here will not perfectly work as we wont handle timeout
         }
         memcpy(&m_estop_message, incomingData, sizeof(m_estop_message));
         m_lastMessageTimestamp = millis();
